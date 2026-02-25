@@ -1,0 +1,6 @@
+{
+  "config.hunger_shield.title": "HungerShield Config",
+  "config.hunger_shield.hunger_shield": "饥饿伤害吸收：%s",
+  "log.hunger_shield.config.read_failed": "读取配置文件失败：%s",
+  "log.hunger_shield.config.write_failed": "写入配置文件失败：%s"
+}

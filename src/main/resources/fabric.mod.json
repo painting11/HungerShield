@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "id": "hungershield",
+  "version": "${version}",
+  "name": "HungerShield",
+  "description": "",
+  "authors": [],
+  "contact": {
+    "repo": "https://github.com/25386/HungerShield"
+  },
+  "license": "MIT",
+  "icon": "assets/hungershield/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "client": [
+      "painting.hungershield.client.HungerShieldClient"
+    ],
+    "main": [
+      "painting.hungershield.HungerShield"
+    ],
+    "modmenu": [
+      "painting.hungershield.modmenu.HungerShieldModMenu"
+    ]
+  },
+  "mixins": [
+    "hungershield.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric": "*",
+    "minecraft": "${minecraft_version}"
+  },
+  "suggests": {
+    "modmenu": "*"
+  }
+}

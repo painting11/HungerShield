@@ -1,0 +1,6 @@
+{
+  "config.hunger_shield.title": "HungerShield Config",
+  "config.hunger_shield.hunger_shield": "Hunger Shield: %s",
+  "log.hunger_shield.config.read_failed": "Failed to read config file: %s",
+  "log.hunger_shield.config.write_failed": "Failed to write config file: %s"
+}

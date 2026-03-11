@@ -16,42 +16,32 @@ import java.nio.file.StandardOpenOption;
 
 public final class HungerShieldConfigManager {
     private static final String FILE_NAME = "hunger_shield.json";
+    private static final boolean DEFAULT_ENABLED = true;
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final Logger LOGGER = LoggerFactory.getLogger("hunger_shield");
     private static final Object LOCK = new Object();
-    private static volatile HungerShieldConfig CONFIG = new HungerShieldConfig();
+    private static volatile boolean hungerShieldEnabled = DEFAULT_ENABLED;
 
     private HungerShieldConfigManager() {
     }
 
-    public static HungerShieldConfig get() {
-        synchronized (LOCK) {
-            return copy(CONFIG);
-        }
-    }
-
     public static boolean isHungerShieldEnabled() {
-        synchronized (LOCK) {
-            return CONFIG.isHungerShieldEnabled();
-        }
+        return hungerShieldEnabled;
     }
 
     public static void setHungerShieldEnabled(boolean enabled) {
         synchronized (LOCK) {
-            CONFIG.setHungerShieldEnabled(enabled);
-            save(CONFIG);
+            if (hungerShieldEnabled == enabled) {
+                return;
+            }
+            hungerShieldEnabled = enabled;
+            save(enabled);
         }
     }
 
     public static void init() {
         synchronized (LOCK) {
-            CONFIG = loadOrCreate();
-        }
-    }
-
-    public static void save() {
-        synchronized (LOCK) {
-            save(CONFIG);
+            hungerShieldEnabled = loadOrCreate();
         }
     }
 
@@ -59,35 +49,33 @@ public final class HungerShieldConfigManager {
         return FabricLoader.getInstance().getConfigDir().resolve(FILE_NAME);
     }
 
-    private static HungerShieldConfig loadOrCreate() {
+    private static boolean loadOrCreate() {
         Path path = getConfigPath();
         if (!Files.exists(path)) {
-            HungerShieldConfig created = new HungerShieldConfig();
-            save(created);
-            return created;
+            save(DEFAULT_ENABLED);
+            return DEFAULT_ENABLED;
         }
 
         try {
             String json = Files.readString(path);
             HungerShieldConfig parsed = GSON.fromJson(json, HungerShieldConfig.class);
             if (parsed == null) {
-                HungerShieldConfig fallback = new HungerShieldConfig();
-                save(fallback);
-                return fallback;
+                LOGGER.warn(Text.translatable("log.hunger_shield.config.read_failed", path.toString()).getString());
+                return DEFAULT_ENABLED;
             }
-            return parsed;
+            return parsed.hunger_shield;
         } catch (IOException | JsonParseException e) {
-            HungerShieldConfig fallback = new HungerShieldConfig();
-            save(fallback);
             LOGGER.warn(Text.translatable("log.hunger_shield.config.read_failed", path.toString()).getString(), e);
-            return fallback;
+            return DEFAULT_ENABLED;
         }
     }
 
-    private static void save(HungerShieldConfig config) {
+    private static void save(boolean enabled) {
         Path path = getConfigPath();
         try {
             Files.createDirectories(path.getParent());
+            HungerShieldConfig config = new HungerShieldConfig();
+            config.hunger_shield = enabled;
             String json = GSON.toJson(config);
             Path tmp = path.resolveSibling(path.getFileName() + ".tmp");
             Files.writeString(tmp, json, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE);
@@ -99,11 +87,5 @@ public final class HungerShieldConfigManager {
         } catch (IOException e) {
             LOGGER.warn(Text.translatable("log.hunger_shield.config.write_failed", path.toString()).getString(), e);
         }
-    }
-
-    private static HungerShieldConfig copy(HungerShieldConfig source) {
-        HungerShieldConfig copied = new HungerShieldConfig();
-        copied.setHungerShieldEnabled(source.isHungerShieldEnabled());
-        return copied;
     }
 }

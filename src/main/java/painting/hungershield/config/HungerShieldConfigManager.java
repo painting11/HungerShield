@@ -51,26 +51,25 @@ public final class HungerShieldConfigManager {
     private static boolean loadOrCreate() {
         Path path = getConfigPath();
         if (!Files.exists(path)) {
-            save(DEFAULT_ENABLED);
+            save(path, DEFAULT_ENABLED);
             return DEFAULT_ENABLED;
         }
-
         try {
-            String json = Files.readString(path);
-            HungerShieldConfig parsed = GSON.fromJson(json, HungerShieldConfig.class);
-            if (parsed == null) {
-                LOGGER.warn("Failed to read config file: {}", path);
-                return DEFAULT_ENABLED;
+            HungerShieldConfig parsed = GSON.fromJson(Files.readString(path), HungerShieldConfig.class);
+            if (parsed != null) {
+                return parsed.hunger_shield;
             }
-            return parsed.hunger_shield;
         } catch (IOException | JsonParseException e) {
             LOGGER.warn("Failed to read config file: {}", path, e);
-            return DEFAULT_ENABLED;
         }
+        return DEFAULT_ENABLED;
     }
 
     private static void save(boolean enabled) {
-        Path path = getConfigPath();
+        save(getConfigPath(), enabled);
+    }
+
+    private static void save(Path path, boolean enabled) {
         try {
             Files.createDirectories(path.getParent());
             HungerShieldConfig config = new HungerShieldConfig();

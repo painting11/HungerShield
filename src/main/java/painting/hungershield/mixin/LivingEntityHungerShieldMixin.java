@@ -24,10 +24,7 @@ public abstract class LivingEntityHungerShieldMixin {
     private void onDamageStart(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
         this.tracking = false;
         Player player = serverPlayer();
-        if (player == null || !Float.isFinite(amount) || amount <= 0.0f || !HungerShieldConfigManager.isHungerShieldEnabled()) {
-            return;
-        }
-        if (player.getFoodData().getFoodLevel() <= 0) {
+        if (!canTrackDamage(player, amount)) {
             return;
         }
         this.healthBefore = player.getHealth();
@@ -42,11 +39,11 @@ public abstract class LivingEntityHungerShieldMixin {
         }
         this.tracking = false;
         Player player = serverPlayer();
-        if (player == null || !HungerShieldConfigManager.isHungerShieldEnabled()) {
+        if (player == null || !player.isAlive() || !HungerShieldConfigManager.isHungerShieldEnabled()) {
             return;
         }
         float healthLost = this.healthBefore - player.getHealth();
-        if (!Float.isFinite(healthLost) || healthLost <= 0.0f) {
+        if (!isPositiveFinite(healthLost)) {
             return;
         }
         applyHungerShield(player, healthLost);
@@ -65,25 +62,33 @@ public abstract class LivingEntityHungerShieldMixin {
     }
 
     @Unique
+    private static boolean canTrackDamage(Player player, float amount) {
+        return player != null
+                && HungerShieldConfigManager.isHungerShieldEnabled()
+                && isPositiveFinite(amount)
+                && player.getFoodData().getFoodLevel() > 0;
+    }
+
+    @Unique
     private static void applyHungerShield(Player player, float healthLost) {
         FoodData foodData = player.getFoodData();
         int foodLevel = foodData.getFoodLevel();
         HungerShieldCarryAccess access = (HungerShieldCarryAccess) player;
         if (foodLevel <= 0) {
-            access.hunger_shield$setHungerShieldCarry(0.0f);
+            resetCarry(access);
             return;
         }
-        if (!Float.isFinite(healthLost) || healthLost <= 0.0f) {
+        if (!isPositiveFinite(healthLost)) {
             return;
         }
         float absorb = Math.min(healthLost, (float) foodLevel);
-        if (!Float.isFinite(absorb) || absorb <= 0.0f) {
+        if (!isPositiveFinite(absorb)) {
             return;
         }
 
         float consume = absorb + access.hunger_shield$getHungerShieldCarry();
         if (!Float.isFinite(consume) || consume < 0.0f) {
-            access.hunger_shield$setHungerShieldCarry(0.0f);
+            resetCarry(access);
             return;
         }
         int consumeWhole = (int) consume;
@@ -100,5 +105,15 @@ public abstract class LivingEntityHungerShieldMixin {
 
         access.hunger_shield$setHungerShieldCarry(carry);
         player.heal(absorb);
+    }
+
+    @Unique
+    private static void resetCarry(HungerShieldCarryAccess access) {
+        access.hunger_shield$setHungerShieldCarry(0.0f);
+    }
+
+    @Unique
+    private static boolean isPositiveFinite(float value) {
+        return Float.isFinite(value) && value > 0.0f;
     }
 }

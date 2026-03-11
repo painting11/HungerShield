@@ -5,5 +5,3 @@ public interface HungerShieldCarryAccess {
 
     void hunger_shield$setHungerShieldCarry(float carry);
 }
-
-

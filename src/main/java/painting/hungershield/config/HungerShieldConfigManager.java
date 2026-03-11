@@ -3,8 +3,7 @@ package painting.hungershield.config;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
-import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.text.Text;
+import net.neoforged.fml.loading.FMLPaths;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,7 +45,7 @@ public final class HungerShieldConfigManager {
     }
 
     private static Path getConfigPath() {
-        return FabricLoader.getInstance().getConfigDir().resolve(FILE_NAME);
+        return FMLPaths.CONFIGDIR.get().resolve(FILE_NAME);
     }
 
     private static boolean loadOrCreate() {
@@ -60,12 +59,12 @@ public final class HungerShieldConfigManager {
             String json = Files.readString(path);
             HungerShieldConfig parsed = GSON.fromJson(json, HungerShieldConfig.class);
             if (parsed == null) {
-                LOGGER.warn(Text.translatable("log.hunger_shield.config.read_failed", path.toString()).getString());
+                LOGGER.warn("Failed to read config file: {}", path);
                 return DEFAULT_ENABLED;
             }
             return parsed.hunger_shield;
         } catch (IOException | JsonParseException e) {
-            LOGGER.warn(Text.translatable("log.hunger_shield.config.read_failed", path.toString()).getString(), e);
+            LOGGER.warn("Failed to read config file: {}", path, e);
             return DEFAULT_ENABLED;
         }
     }
@@ -85,7 +84,7 @@ public final class HungerShieldConfigManager {
                 Files.move(tmp, path, StandardCopyOption.REPLACE_EXISTING);
             }
         } catch (IOException e) {
-            LOGGER.warn(Text.translatable("log.hunger_shield.config.write_failed", path.toString()).getString(), e);
+            LOGGER.warn("Failed to write config file: {}", path, e);
         }
     }
 }

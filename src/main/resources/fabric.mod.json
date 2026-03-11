@@ -6,15 +6,12 @@
   "description": "",
   "authors": [],
   "contact": {
-    "repo": "https://github.com/25386/HungerShield"
+    "repo": "https://github.com/painting11/HungerShield"
   },
   "license": "MIT",
   "icon": "assets/hungershield/icon.png",
   "environment": "*",
   "entrypoints": {
-    "client": [
-      "painting.hungershield.client.HungerShieldClient"
-    ],
     "main": [
       "painting.hungershield.HungerShield"
     ],

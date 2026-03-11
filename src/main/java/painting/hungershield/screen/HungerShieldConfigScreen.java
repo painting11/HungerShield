@@ -4,7 +4,6 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.text.Text;
-import painting.hungershield.config.HungerShieldConfig;
 import painting.hungershield.config.HungerShieldConfigManager;
 
 public class HungerShieldConfigScreen extends Screen {
@@ -17,17 +16,15 @@ public class HungerShieldConfigScreen extends Screen {
 
     @Override
     protected void init() {
-        HungerShieldConfig config = HungerShieldConfigManager.get();
-
         int buttonWidth = 220;
         int buttonHeight = 20;
         int centerX = (this.width - buttonWidth) / 2;
         int centerY = this.height / 2;
 
-        ButtonWidget toggle = ButtonWidget.builder(getToggleText(config.hunger_shield), button -> {
-            config.hunger_shield = !config.hunger_shield;
-            HungerShieldConfigManager.save();
-            button.setMessage(getToggleText(config.hunger_shield));
+        ButtonWidget toggle = ButtonWidget.builder(getToggleText(HungerShieldConfigManager.isHungerShieldEnabled()), button -> {
+            boolean nextEnabled = !HungerShieldConfigManager.isHungerShieldEnabled();
+            HungerShieldConfigManager.setHungerShieldEnabled(nextEnabled);
+            button.setMessage(getToggleText(nextEnabled));
         }).dimensions(centerX, centerY - 10, buttonWidth, buttonHeight).build();
         this.addDrawableChild(toggle);
 

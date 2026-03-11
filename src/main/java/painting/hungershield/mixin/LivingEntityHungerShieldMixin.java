@@ -23,7 +23,7 @@ public abstract class LivingEntityHungerShieldMixin {
     @Unique
     private void onDamageStart(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
         this.tracking = false;
-        if (!HungerShieldConfigManager.get().hunger_shield) {
+        if (!HungerShieldConfigManager.isHungerShieldEnabled()) {
             return;
         }
         PlayerEntity player = serverPlayer();
@@ -41,7 +41,7 @@ public abstract class LivingEntityHungerShieldMixin {
             return;
         }
         this.tracking = false;
-        if (!HungerShieldConfigManager.get().hunger_shield) {
+        if (!HungerShieldConfigManager.isHungerShieldEnabled()) {
             return;
         }
         PlayerEntity player = serverPlayer();

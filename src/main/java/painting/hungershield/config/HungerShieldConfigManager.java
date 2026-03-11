@@ -18,21 +18,41 @@ public final class HungerShieldConfigManager {
     private static final String FILE_NAME = "hunger_shield.json";
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final Logger LOGGER = LoggerFactory.getLogger("hunger_shield");
+    private static final Object LOCK = new Object();
     private static volatile HungerShieldConfig CONFIG = new HungerShieldConfig();
 
     private HungerShieldConfigManager() {
     }
 
     public static HungerShieldConfig get() {
-        return CONFIG;
+        synchronized (LOCK) {
+            return copy(CONFIG);
+        }
+    }
+
+    public static boolean isHungerShieldEnabled() {
+        synchronized (LOCK) {
+            return CONFIG.hunger_shield;
+        }
+    }
+
+    public static void setHungerShieldEnabled(boolean enabled) {
+        synchronized (LOCK) {
+            CONFIG.hunger_shield = enabled;
+            save(CONFIG);
+        }
     }
 
     public static void init() {
-        CONFIG = loadOrCreate();
+        synchronized (LOCK) {
+            CONFIG = loadOrCreate();
+        }
     }
 
     public static void save() {
-        save(CONFIG);
+        synchronized (LOCK) {
+            save(CONFIG);
+        }
     }
 
     private static Path getConfigPath() {
@@ -79,5 +99,11 @@ public final class HungerShieldConfigManager {
         } catch (IOException e) {
             LOGGER.warn(Text.translatable("log.hunger_shield.config.write_failed", path.toString()).getString(), e);
         }
+    }
+
+    private static HungerShieldConfig copy(HungerShieldConfig source) {
+        HungerShieldConfig copied = new HungerShieldConfig();
+        copied.hunger_shield = source.hunger_shield;
+        return copied;
     }
 }

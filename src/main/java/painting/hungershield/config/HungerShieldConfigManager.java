@@ -32,13 +32,13 @@ public final class HungerShieldConfigManager {
 
     public static boolean isHungerShieldEnabled() {
         synchronized (LOCK) {
-            return CONFIG.hunger_shield;
+            return CONFIG.isHungerShieldEnabled();
         }
     }
 
     public static void setHungerShieldEnabled(boolean enabled) {
         synchronized (LOCK) {
-            CONFIG.hunger_shield = enabled;
+            CONFIG.setHungerShieldEnabled(enabled);
             save(CONFIG);
         }
     }
@@ -103,7 +103,7 @@ public final class HungerShieldConfigManager {
 
     private static HungerShieldConfig copy(HungerShieldConfig source) {
         HungerShieldConfig copied = new HungerShieldConfig();
-        copied.hunger_shield = source.hunger_shield;
+        copied.setHungerShieldEnabled(source.isHungerShieldEnabled());
         return copied;
     }
 }
